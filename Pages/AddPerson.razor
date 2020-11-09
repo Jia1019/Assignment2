@@ -1,0 +1,393 @@
+﻿@page "/AddPerson"
+@using Assignment.Data
+@using Models
+@using System.Runtime.InteropServices
+@inject IFamilyService FamilyService
+@inject NavigationManager NavigationManager
+<h3>AddPerson</h3>
+<p>
+    Choose the role of the person:
+    <select class="form-control selectpicker" style="width: auto" @bind="role">
+        <option>Adult</option>
+        <option>Child</option>
+    </select>
+</p>
+@if (role.Equals("Adult"))
+{
+    <EditForm Model="@newAdult" OnValidSubmit="@AddNewAdult">
+        <DataAnnotationsValidator/>
+        <ValidationSummary/>
+         <div style="color: red">
+                    @personError
+                </div>
+        <div class="form-group">
+            ID: 
+            <input type="number" @bind="newAdult.Id"/>
+            <button class="btn btn-outline-dark" type="submit" style="float: right">Create</button>
+        </div>
+        <div class="form-group">
+            First Name: 
+            <InputText @bind-Value="newAdult.FirstName"/>
+        </div>
+        <div class="form-group">
+            Last Name: 
+            <InputText @bind-Value="newAdult.LastName"/>
+        </div>
+        <div class="form-group">
+            Age: 
+            <input type="number" @bind="newAdult.Age"/>
+        </div>
+        <div class="form-group">
+            Sex:
+            <select class="form-control selectpicker" style="width: 100px" @bind="newAdult.Sex">
+                <option>Male</option>
+                <option>Female</option>
+            </select>
+        </div>
+        <div class="form-group">
+            Hair color:
+            <select class="form-control selectpicker" style="width: 150px" @bind="newAdult.HairColor">
+                <option>Blond</option>
+                <option>Red</option>
+                <option>Brown</option>
+                <option>Black</option>
+                <option>White</option>
+                <option>Grey</option>
+                <option>Blue</option>
+                <option>Green</option>
+                <option>Leverpostej</option>
+            </select>
+        </div>
+        <div class="form-group">
+            Eye color:
+            <select class="form-control selectpicker" style="width: 150px" @bind="newAdult.EyeColor">
+                <option>Black</option>
+                <option>Brown</option>
+                <option>Grey</option>
+                <option>Green</option>
+                <option>Blue</option>
+                <option>Amber</option>
+                <option>Hazel</option>
+            </select>
+        </div>
+        <div class="form-group">
+            Weight: 
+            <input type="number" step="0.1" class="form-control" @bind="newAdult.Weight"/>
+        </div>
+        <div class="form-group">
+            Height:
+            <input type="number" @bind="newAdult.Height"/>
+        </div>
+        <div class="form-group">
+            Job:
+            <select class="form-control selectpicker" style="width: 250px" @bind="newAdult.JobTitle">
+                <option>Teacher</option>
+                <option>Engineer</option>
+                <option>Garbage Collector</option>
+                <option>Shepherd</option>
+                <option>Pilot</option>
+                <option>Police Officer</option>
+                <option>Pirate</option>
+                <option>Fireman</option>
+                <option>Astronaut</option>
+                <option>Captain</option>
+                <option>Soldier</option>
+                <option>Pizza Chef</option>
+                <option>Chef</option>
+                <option>Janitor</option>
+                <option>Factory Worker</option>
+                <option>Chauffeur</option>
+                <option>Waitress</option>
+                <option>Ninja</option>
+                <option>Doctor</option>
+                <option>Nurse</option>
+                <option>Chemist</option>
+                <option>Caretaker</option>
+                <option>Gardener</option>
+                <option>Mascot</option>
+                <option>Athlete</option>
+            </select>
+        </div>
+    </EditForm>
+}
+else
+{
+    <EditForm Model="@newChild" OnValidSubmit="@AddNewChild">
+        <DataAnnotationsValidator/>
+        <ValidationSummary/>
+        <div style="color: red">
+            @personError
+        </div>
+        <div class="form-group">
+            ID: 
+            <input type="number" @bind="newChild.Id"/>
+            <button class="btn btn-outline-dark" type="submit" style="float: right">Create</button>
+        </div>
+        <div class="form-group">
+            First Name: 
+            <InputText @bind-Value="newChild.FirstName"/>
+        </div>
+        <div class="form-group">
+            Last Name: 
+            <InputText @bind-Value="newChild.LastName"/>
+        </div>
+        <div class="form-group">
+            Age: 
+            <input type="number" @bind="newChild.Age"/>
+        </div>
+        <div class="form-group">
+            Sex:
+            <select class="form-control selectpicker" style="width: 100px" @bind="newChild.Sex">
+                <option>Male</option>
+                <option>Female</option>
+            </select>
+        </div>
+        <div class="form-group">
+            Hair color:
+            <select class="form-control selectpicker" style="width: 150px" @bind="newChild.HairColor">
+                <option>Blond</option>
+                <option>Red</option>
+                <option>Brown</option>
+                <option>Black</option>
+                <option>White</option>
+                <option>Grey</option>
+                <option>Blue</option>
+                <option>Green</option>
+                <option>Leverpostej</option>
+            </select>
+        </div>
+        <div class="form-group">
+            Eye color:
+            <select class="form-control selectpicker" style="width: 150px" @bind="newChild.EyeColor">
+                <option>Black</option>
+                <option>Brown</option>
+                <option>Grey</option>
+                <option>Green</option>
+                <option>Blue</option>
+                <option>Amber</option>
+                <option>Hazel</option>
+            </select>
+        </div>
+        <div class="form-group">
+            Weight: <br/>
+            <input type="number" step="0.1" class="form-control" @bind="newChild.Weight"/>
+        </div>
+        <div class="form-group">
+            Height:
+            <input type="number" @bind="newChild.Height"/>
+        </div>
+        <div class="form-group">
+            Interest:
+            <form>
+                @foreach (var childInterest in interest.validTypes)
+                {
+                    <input type="checkbox" checked="@hasInterest(childInterest)" @onchange="@(() => ChooseNewInterest(childInterest))">
+                    @childInterest
+                }
+            </form>
+        </div>
+    </EditForm>
+    <EditForm Model="@newPet" OnValidSubmit="@AddNewPet">
+           <DataAnnotationsValidator/>
+           <ValidationSummary/> 
+            <div class="form-group">
+                Pet:
+                ID: <input type="number" @bind="newPet.Id"/>
+                Species:
+                <select class="form-control selectpicker" style="width: 150px" @bind="newPet.Species">
+                    <option>Hamster</option>
+                    <option>Bunny</option>
+                    <option>Frog</option>
+                    <option>Budgerigar</option>
+                    <option>Owl</option>
+                    <option>Snake</option>
+                    <option>Dog</option>
+                    <option>Cat</option>
+                </select>
+                Name: <InputText @bind-Value="newPet.Name"/>
+                Age: <input type="number" @bind="newPet.Age"/>
+                <p class="actions">
+                    <button class="btn btn-outline-dark" type="submit" @onclick="(() => AddNewPet())">ADD</button>
+                </p>
+            </div>
+       <!-- </EditForm> -->
+
+        @if (newChild.Pets == null)
+        {
+            <p>
+                <em>Loading...</em>
+            </p>
+        }
+        else if (!newChild.Pets.Any())
+        {
+            <p>
+                <em>The child has no pets.</em>
+            </p>
+        }
+        else
+        {
+            <div style="color: red">
+                @outError
+            </div>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Species</th>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>Remove</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var item in newChild.Pets)
+                {
+                    <tr>
+                        <td>@item.Id</td>
+                        <td>@item.Species</td>
+                        <td>@item.Name</td>
+                        <td>@item.Age</td>
+                        <td>
+                            <button @onclick="@(() => RemovePet(item.Id))">
+                                <i class="oi oi-trash" style="color: red"/>
+                            </button>
+                        </td>
+                    </tr>
+
+                }
+                </tbody>
+            </table>
+        }
+      </EditForm>
+       
+    
+    }
+
+    @code {
+        private Adult newAdult ;
+        private Child newChild;
+        private string role;
+        private Pet newPet;
+        private string outError;
+        private string personError;
+        private Interest interest;
+
+        protected override async Task OnInitializedAsync()
+        {
+            
+            newPet = new Pet
+            {
+                Id = 0,
+                Species = "Hamster",
+                Name = null,
+                Age = 0
+            };
+            interest = new Interest();
+            newAdult = new Adult
+            {
+                Id = 0,
+                FirstName = null,
+                LastName = null,
+                Age = 0,
+                Sex = "Male",
+                HairColor = "Blond",
+                EyeColor = "Black",
+                Height = 0,
+                JobTitle = "Teacher"
+            };
+            newChild = new Child
+            {
+                Id = 0,
+                FirstName = null,
+                LastName = null,
+                Age = 0,
+                Sex = "Male",
+                HairColor = "Blond",
+                EyeColor = "Black",
+                Height = 0,
+                ChildInterests = new List<Interest>(),
+                Pets = new List<Pet>()
+            };
+            role = "Adult";
+        }
+
+        private async Task AddNewAdult()
+        {
+            personError=await FamilyService.AddAdult(newAdult);
+            if (string.IsNullOrEmpty(personError))
+            {
+                NavigationManager.NavigateTo("/PeopleList");
+            }
+        }
+
+        private async Task AddNewChild()
+        {
+            personError=await FamilyService.AddChildren(newChild);
+            if (string.IsNullOrEmpty(personError))
+            {
+                NavigationManager.NavigateTo("/PeopleList");
+            }
+        }
+
+        private void AddNewPet()
+        {
+            outError = null;
+            foreach (var pets in newChild.Pets)
+            {
+                if (newPet.Id==pets.Id)
+                {
+                    outError = "You had this pet (the id has repeated)";
+                    break;
+                }
+                if (newPet.Name==null)
+                {
+                    outError = "You should write the name of the pet";
+                    break;
+                }
+            }
+            if (outError==null)
+            {
+                newChild.Pets.Add(newPet);
+            }
+            newPet = new Pet
+            {
+                Id = 0,
+                Species = "Hamster",
+                Name = null,
+                Age = 0
+            };
+        }
+
+        private void RemovePet(int petId)
+        {
+            Pet petToRemove = newChild.Pets.First(t => t.Id == petId);
+            newChild.Pets.Remove(petToRemove);
+        }
+
+        private void ChooseNewInterest(string interest)
+        {
+            if (hasInterest(interest))
+            {
+                newChild.ChildInterests.Remove(new Interest{Type = interest});
+            }
+            else
+            {
+                newChild.ChildInterests.Add(new Interest{Type = interest});
+            }
+        }
+
+        private bool hasInterest(string interest)
+        {
+            foreach (var Interest in newChild.ChildInterests)
+            {
+                if (Interest.Type.Equals(interest))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        
+
+    }

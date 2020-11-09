@@ -1,0 +1,84 @@
+﻿@page "/FamilyList"
+@using Models
+@using Assignment.Data
+@inject IFamilyService familiesService
+@inject NavigationManager NavigationManager
+<h3>Family List</h3>
+@if (familiesToShow == null)
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+}
+else if (!familiesToShow.Any())
+{
+    <p>
+        <em>No families exist. Please add some.</em>
+    </p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Family ID</th>
+                <th>Street Name</th>
+                <th>House Number</th>
+                <th>Adult(num)</th>
+                <th>Child(num)</th>
+                <th>Pet(num)</th>
+                <th>Update</th>
+                <th>Remove</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var family in familiesToShow)
+        {
+            <tr>
+                <td>@family.Id</td>
+                <td>@family.StreetName</td>
+                <td>@family.HouseNumber</td>
+                <td>@family.Adults.Count</td>
+                <td>@family.Children.Count</td>
+                <td>@family.Pets.Count</td>
+                <td>
+                    <button @onclick="@(() => UpdateOldFamily(family))">
+                        <i class="oi oi-justify-center" style="color: cornflowerblue"/>
+                    </button>
+                </td>
+                <td>
+                    <button @onclick="@(() => RemoveFamily(family.Id))">
+                        <i class="oi oi-trash" style="color: red"/>
+                    </button>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+
+@code {
+    private IList<Family> familiesToShow;
+    private IList<Family> allFamilies;
+
+    protected override async Task OnInitializedAsync()
+    {
+        allFamilies = await familiesService.GetFamilies();
+        familiesToShow = allFamilies;
+    }
+    
+    private async Task RemoveFamily(int familyId)
+    {
+        Family familyToRemove = familiesToShow.First(t => t.Id == familyId);
+        await familiesService.RemoveFamily(familyId);
+        familiesToShow.Remove(familyToRemove);
+    }
+    
+    private async Task UpdateOldFamily(Family family)
+    {
+        UpdateFamily.OldFamily = family;
+        NavigationManager.NavigateTo("/UpdateFamily");
+    }
+
+}

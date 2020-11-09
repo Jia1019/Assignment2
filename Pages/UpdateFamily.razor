@@ -1,0 +1,356 @@
+﻿@page "/UpdateFamily"
+@using Assignment.Data
+@using Models
+@inject IFamilyService FamilyService
+@inject NavigationManager NavigationManager
+<h3>Update Family</h3>
+<EditForm Model="@OldFamily" OnValidSubmit="@updateFamily">
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+    <div style="color: red">
+        @familyError
+    </div>
+    <div class="form-group">
+        Street Name: 
+        <InputText @bind-Value="OldFamily.StreetName" />
+        <button class="btn btn-outline-dark" type="submit" style="color: red">SAVE</button>
+    </div>
+    <div class="form-group">
+        House Number: 
+        <InputNumber @bind-Value="OldFamily.HouseNumber"/>
+    </div>
+</EditForm>
+<EditForm Model="@adult" OnValidSubmit="@AddAdult">
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+    <div style="color: red">
+            @adultError
+        </div>
+    <div class="form-group">
+        Adult: <br/>
+        <InputNumber @bind-Value="adult.Id"/>
+        <button class="btn btn-outline-dark" type="submit">add</button>
+        @if (OldFamily.Adults == null)
+        {
+            <p>
+                <em>Loading...</em>
+            </p>
+        }
+        else if (!OldFamily.Adults.Any())
+        {
+            <p>
+                <em>No adults in the family...</em>
+            </p>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Sex</th>
+                    <th>Hair Color</th>
+                    <th>Eye color</th>
+                    <th>Age</th>
+                    <th>Weight</th>
+                    <th>Height</th>
+                    <th>Job</th>
+                    <th>Remove</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var adult in OldFamily.Adults)
+                {
+                    <tr>
+                        <td>@adult.Id</td>
+                        <td>@adult.FirstName</td>
+                        <td>@adult.LastName</td>
+                        <td>@adult.Sex</td>
+                        <td>@adult.HairColor</td>
+                        <td>@adult.EyeColor</td>
+                        <td>@adult.Age</td>
+                        <td>@adult.Weight</td>
+                        <td>@adult.Height</td>
+                        <td>@adult.JobTitle</td>
+                        <td>
+                            <button @onclick="@(() => RemoveAdult(adult.Id))">
+                                <i class="oi oi-trash" style="color:red"/>
+                            </button>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+    </div>
+</EditForm>
+<EditForm Model="@child" OnValidSubmit="@AddChild">
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+    <div class="form-group">
+    Child: 
+    <InputNumber @bind-Value="child.Id"/>
+    <button class="btn btn-outline-dark" type="submit">add</button>
+    <div style="color: red">
+        @childError
+    </div>
+    @if (OldFamily.Children == null)
+    {
+        <p>
+            <em>Loading...</em>
+        </p>
+    }
+    else if (!OldFamily.Children.Any())
+    {
+        <p>
+            <em>No children in the family...</em>
+        </p>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Sex</th>
+                <th>Hair Color</th>
+                <th>Eye color</th>
+                <th>Age</th>
+                <th>Weight</th>
+                <th>Height</th>
+                <th>Interest</th>
+                <th>Pet</th>
+                <th>Remove</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var child in OldFamily.Children)
+            {
+                <tr>
+                    <td>@child.Id</td>
+                    <td>@child.FirstName</td>
+                    <td>@child.LastName</td>
+                    <td>@child.Sex</td>
+                    <td>@child.HairColor</td>
+                    <td>@child.EyeColor</td>
+                    <td>@child.Age</td>
+                    <td>@child.Weight</td>
+                    <td>@child.Height</td>
+                    <td>@child.ChildInterests.ToString()</td>
+                    <td>@child.Pets.ToString()</td>
+                    <td>
+                        <button @onclick="@(() => RemoveChild(child.Id))">
+                            <i class="oi oi-trash" style="color:red"/>
+                        </button>
+
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+</div>
+</EditForm>
+<EditForm Model="@newPet" OnValidSubmit="@AddNewPet">
+           <DataAnnotationsValidator/>
+           <ValidationSummary/>
+            <div class="form-group">
+                Pet:
+                ID: <InputNumber @bind-Value="newPet.Id"/>
+                Species:
+                <select class="form-control selectpicker" style="width: 150px" @bind="newPet.Species">
+                    <option>Hamster</option>
+                    <option>Bunny</option>
+                    <option>Frog</option>
+                    <option>Budgerigar</option>
+                    <option>Owl</option>
+                    <option>Snake</option>
+                    <option>Dog</option>
+                    <option>Cat</option>
+                </select>
+                Name: <InputText @bind-Value="newPet.Name"/>
+                Age: <InputNumber @bind-Value="newPet.Age"/>
+                <p class="actions">
+                    <button class="btn btn-outline-dark" type="submit" @onclick="(() => AddNewPet())">ADD</button>
+                </p>
+                            
+            </div>
+            @if (OldFamily.Pets == null)
+                    {
+                        <p>
+                            <em>Loading...</em>
+                        </p>
+                    }
+                    else if (!OldFamily.Pets.Any())
+                    {
+                        <p>
+                            <em>The child has no pets.</em>
+                        </p>
+                    }
+                    else
+                    {
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Species</th>
+                                <th>Name</th>
+                                <th>Age</th>
+                                <th>Remove</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var item in OldFamily.Pets)
+                            {
+                                <tr>
+                                    <td>@item.Id</td>
+                                    <td>@item.Species</td>
+                                    <td>@item.Name</td>
+                                    <td>@item.Age</td>
+                                    <td>
+                                        <button @onclick="@(() => RemovePet(item.Id))">
+                                            <i class="oi oi-trash" style="color: red"/>
+                                        </button>
+                                    </td>
+                                </tr>
+            
+                            }
+                            </tbody>
+                        </table>
+                    }
+            
+        </EditForm>
+    
+@code {
+    public static Family OldFamily;
+    private Pet newPet;
+    private Adult adult;
+    private Child child;
+    private string outError;
+    private string adultError;
+    private string childError;
+    private string familyError;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        newPet = new Pet
+        {
+            Id = 0,
+            Species = "Hamster",
+            Name = null,
+            Age = 0
+        };
+        adult = new Adult();
+        child = new Child();
+    }
+    
+    private async Task updateFamily()
+    {
+        await FamilyService.UpdateFamily(OldFamily);
+        familyError = await FamilyService.getFamilyError();
+        if (string.IsNullOrEmpty(familyError))
+        {
+            NavigationManager.NavigateTo("/FamilyList");
+        }
+        
+    }
+    private void RemoveAdult(int adultId)
+    {
+        Adult adultToRemove = OldFamily.Adults.First(t => t.Id == adultId);
+        //FamilyService.RemoveAdult(adultId);
+        OldFamily.Adults.Remove(adultToRemove);
+    }
+
+    private void AddAdult()
+    {
+        adultError = null;
+        foreach (var adults in OldFamily.Adults)
+        {
+            if (adult.Id==adults.Id)
+            {
+                adultError = "there is already the adult in the family";
+                break;
+            }
+        }
+        if (adultError==null&&FamilyService.getAdultById(adult.Id)!=null)
+        {
+            OldFamily.Adults.Add(adult);
+        }
+        else
+        {
+            adultError = "There is no id of the adult";
+        }
+        adult = new Adult();
+        
+    }
+
+    private void AddChild()
+    {
+        childError = null;
+        foreach (var children in OldFamily.Children)
+        {
+            if (child.Id==children.Id)
+            {
+                childError = "There is already the child in the family";
+                break;
+            }
+        }
+        if (childError==null&&FamilyService.getChildById(child.Id)!=null)
+        {
+            OldFamily.Children.Add(child);
+        }
+        else
+        {
+            childError = "There is no id of the child";
+        }
+        
+        child = new Child();
+        
+    }
+
+    private void RemoveChild(int childId)
+    {
+        Child childToRemove = OldFamily.Children.First(t => t.Id == childId);
+        //FamilyService.RemoveChild(childId);
+        OldFamily.Children.Remove(childToRemove);
+    }
+    
+    private void AddNewPet()
+    {
+        outError = null;
+        foreach (var pets in OldFamily.Pets)
+        {
+            if (newPet.Id==pets.Id)
+            {
+                outError = "You had this pet (the id has repeated)";
+                break;
+            }
+            if (newPet.Name==null)
+            {
+                outError = "You should write the name of the pet";
+                break;
+            }
+        }
+        if (outError==null)
+        {
+            OldFamily.Pets.Add(newPet);
+        }
+        newPet = new Pet
+        {
+            Id = 0,
+            Species = "Hamster",
+            Name = null,
+            Age = 0
+        };
+    }
+
+    private void RemovePet(int petId)
+    {
+        Pet petToRemove = OldFamily.Pets.First(t => t.Id == petId);
+        OldFamily.Pets.Remove(petToRemove);
+    }
+}

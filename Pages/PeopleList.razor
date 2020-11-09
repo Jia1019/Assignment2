@@ -1,0 +1,325 @@
+﻿@page "/PeopleList"
+@using Models
+@using Assignment.Data
+@using Microsoft.AspNetCore.Mvc.Formatters
+@inject IFamilyService FamilyService
+@inject NavigationManager NavigationManager
+<h3>People List</h3>
+<p>
+    Filter by person Id: <input type="number" @oninput="@((arg) => FilterByPersonId(arg))" style="width:50px"/>
+</p>
+<p>
+    Filter by person role:
+    <select class="form-control selectpicker" style="width:100px" @bind="role">
+        <option>Person</option>
+        <option>Adult</option> 
+        <option>Child</option>
+    </select>
+</p>
+@if (adultsToShow == null || childrenToshow == null || peopleToShow == null)
+{
+    <p>
+        <em>Loading</em>
+    </p>
+}
+else
+{
+    if (role == "Adult")
+    {
+        if (!adultsToShow.Any())
+        {
+            <p>
+                <em>Can't find any adults...</em>
+            </p>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Sex</th>
+                    <th>Hair Color</th>
+                    <th>Eye color</th>
+                    <th>Age</th>
+                    <th>Weight</th>
+                    <th>Height</th>
+                    <th>Job</th>
+                    <th>Update</th>
+                    <th>Remove</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var adult in adultsToShow)
+                {
+                    <tr>
+                        <td>@adult.Id</td>
+                        <td>@adult.FirstName</td>
+                        <td>@adult.LastName</td>
+                        <td>@adult.Sex</td>
+                        <td>@adult.HairColor</td>
+                        <td>@adult.EyeColor</td>
+                        <td>@adult.Age</td>
+                        <td>@adult.Weight</td>
+                        <td>@adult.Height</td>
+                        <td>@adult.JobTitle</td>
+                        <td>
+                            <button @onclick="@(() => UpdateOldAdult(adult))">
+                                <i class="oi oi-justify-center" style="color: cornflowerblue"/>
+                            </button>
+                        </td>
+                        <td>
+                            <button @onclick="@(() => RemoveAdult(adult.Id))">
+                                <i class="oi oi-trash" style="color: red"/>
+                            </button>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+        
+    }
+    else if (role == "Child")
+    {
+        if (!childrenToshow.Any())
+        {
+            <p>
+                <em>Can't find any children...</em>
+            </p>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Sex</th>
+                    <th>Hair Color</th>
+                    <th>Eye color</th>
+                    <th>Age</th>
+                    <th>Weight</th>
+                    <th>Height</th>
+                    <th>Interest</th>
+                    <th>Pet</th>
+                    <th>Update</th>
+                    <th>Remove</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var child in childrenToshow)
+                {
+                    <tr>
+                        <td>@child.Id</td>
+                        <td>@child.FirstName</td>
+                        <td>@child.LastName</td>
+                        <td>@child.Sex</td>
+                        <td>@child.HairColor</td>
+                        <td>@child.EyeColor</td>
+                        <td>@child.Age</td>
+                        <td>@child.Weight</td>
+                        <td>@child.Height</td>
+                        <td>@child.interestList()</td>
+                        <td>@child.petList()</td>
+                        <td>
+                            <button @onclick="@(() => UpdateOldChild(child))">
+                                <i class="oi oi-justify-center" style="color: cornflowerblue"/>
+                            </button>
+                        </td>
+                        <td>
+                            <button @onclick="@(() => RemoveChild(child.Id))">
+                                <i class="oi oi-trash" style="color: red"/>
+                            </button>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+    }
+    else
+    {
+        if (!peopleToShow.Any())
+        {
+            <p>
+                <em>Can't find any people...</em>
+            </p>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Sex</th>
+                    <th>Hair Color</th>
+                    <th>Eye color</th>
+                    <th>Age</th>
+                    <th>Weight</th>
+                    <th>Height</th>
+                    <th>Remove</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var person in peopleToShow)
+                {
+                    <tr>
+                        <td>@person.Id</td>
+                        <td>@person.FirstName</td>
+                        <td>@person.LastName</td>
+                        <td>@person.Sex</td>
+                        <td>@person.HairColor</td>
+                        <td>@person.EyeColor</td>
+                        <td>@person.Age</td>
+                        <td>@person.Weight</td>
+                        <td>@person.Height</td>
+                        <td>
+                            <button @onclick="@(() => RemovePerson(person.Id))">
+                                <i class="oi oi-trash" style="color: red"/>
+                            </button>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+    }
+
+@code {
+    private IList<Child> childrenToshow;
+    private IList<Child> allChildren;
+    private IList<Adult> adultsToShow;
+    private IList<Adult> allAdults;
+    private IList<Person> peopleToShow;
+    private IList<Person> allPeople;
+    private string role;
+  
+
+    protected override async Task OnInitializedAsync()
+    {
+        
+        allAdults = await FamilyService.GetAdults();
+        adultsToShow = allAdults;
+        allChildren = await FamilyService.GetChildren();
+        childrenToshow = allChildren;
+        peopleToShow = new List<Person>();
+        allPeople = new List<Person>();
+        role = "Person";
+        foreach (var adult in allAdults)
+        {
+            allPeople.Add(adult);
+        }
+        foreach (var child in allChildren)
+        {
+            allPeople.Add(child);
+        }
+        peopleToShow=allPeople;
+    }
+
+    private async Task UpdateList()
+    {
+        allAdults = await FamilyService.GetAdults();
+        adultsToShow = allAdults;
+        allChildren = await FamilyService.GetChildren();
+        childrenToshow = allChildren;
+        allPeople = new List<Person>();
+        foreach (var adult in allAdults)
+        {
+            allPeople.Add(adult);
+        }
+        foreach (var child in allChildren)
+        {
+            allPeople.Add(child);
+        }
+        peopleToShow=allPeople;
+    }
+
+    private async Task UpdateOldAdult(Adult adult)
+    {
+        UpdateAdult.OldAdult = adult;
+        NavigationManager.NavigateTo("/UpdateAdult");
+    }
+
+    private async Task UpdateOldChild(Child child)
+    {
+        UpdateChild.OldChild = child;
+        NavigationManager.NavigateTo("/UpdateChild");
+    }
+    
+    private async Task RemoveAdult(int adultId)
+    {
+        Adult adultToRemove = adultsToShow.First(t => t.Id == adultId);
+        await FamilyService.RemoveAdult(adultId);
+        adultsToShow.Remove(adultToRemove);
+    }
+
+    private async Task RemoveChild(int childId)
+    {
+        Child childToRemove = childrenToshow.First(t => t.Id == childId);
+        await FamilyService.RemoveChild(childId);
+        childrenToshow.Remove(childToRemove);
+    }
+
+    private async Task RemovePerson(int personId)
+    {
+        await FamilyService.RemoveChild(personId);
+        await FamilyService.RemoveAdult(personId);
+        await UpdateList();
+    }
+
+    private void FilterByPersonId(ChangeEventArgs args)
+    {
+        int? filterById = null;
+        try
+        {
+            filterById = int.Parse(args.Value.ToString());
+        }
+        catch (Exception e)
+        {
+        }
+        if (role == "Adult")
+        {
+            if (filterById != null)
+            {
+                adultsToShow = allAdults.Where(t => t.Id == filterById).ToList();
+            }
+            else
+            {
+                adultsToShow = allAdults;
+            }
+        }
+        else if (role == "Child")
+        {
+            if (filterById != null)
+            {
+                childrenToshow = allChildren.Where(t => t.Id == filterById).ToList();
+            }
+            else
+            {
+                childrenToshow = allChildren;
+            }
+        }
+        else
+        {
+            if (filterById != null)
+            {
+                peopleToShow = allPeople.Where(t => t.Id == filterById).ToList();
+            }
+            else
+            {
+                peopleToShow = allPeople;
+            }
+        }
+
+    }
+    
+        
+    }
+
+}

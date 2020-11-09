@@ -1,0 +1,51 @@
+﻿@page "/"
+@using Assignment.Data
+@using Models
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IFamilyService familiesService
+@inject NavigationManager NavigationManager;
+
+        <div class="form-group">
+            <label>User name:</label><br/>
+            <input type="text" placeholder="user name" @bind-value="userName"/>
+        </div>
+        <div class="form-group">
+            <label>Password</label><br/>
+            <input type="password" placeholder="password" @bind-value="password"/>
+        </div>
+<div style="color:red">@errorMessage</div> 
+<p>
+    <button class="btn btn-outline-dark" type="submit" @onclick="PerformLogin"> Login </button>
+</p>
+
+
+
+@code {
+    private string userName;
+    private string password;
+    private string errorMessage;
+
+    private async Task PerformLogin()
+    {
+        foreach (var item in await familiesService.GetUsers())
+        {
+            if (item.Password == password && item.UserName == userName)
+            {
+               NavigationManager.NavigateTo("/FamilyList");
+                UserAccount.password = password;
+                UserAccount.username = userName;
+                break;
+            }
+            else if (item.UserName == userName && item.Password != password )
+            {
+                errorMessage = "The password is wrong!";
+                break;
+            }
+            else
+            {
+                errorMessage = "The username doesn't exist";
+            }
+        }
+    }
+
+}

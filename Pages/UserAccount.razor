@@ -1,0 +1,18 @@
+﻿@page "/UserAccount"
+@inject NavigationManager NavigationManager;
+<h3>Hello</h3>
+<div>@username</div>
+<p>
+    <button class="btn btn-outline-dark" type="submit" @onclick="performLogOut">Log out</button>
+</p>
+
+@code {
+    public static string username;
+    public static string password;
+
+    private void performLogOut()
+    {
+        NavigationManager.NavigateTo("/");
+        username = null;
+    }
+}

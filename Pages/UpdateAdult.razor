@@ -1,0 +1,123 @@
+﻿@page "/UpdateAdult"
+@using Models
+@using Assignment.Data
+@inject IFamilyService FamilyService
+@inject NavigationManager NavigationManager
+<h3>Update Adult</h3>
+<p>
+    the role of the person:
+    <select class="form-control selectpicker" style="width: auto" @bind="role">
+        <option>Adult</option>
+    </select>
+</p>
+@if (role.Equals("Adult"))
+{
+    <EditForm Model="@OldAdult" OnValidSubmit="@updateAdult">
+        <DataAnnotationsValidator/>
+        <ValidationSummary/>
+        <div class="form-group">
+            ID: @OldAdult.Id
+            <button class="btn btn-outline-dark" type="submit" style="float: right">SAVE</button>
+        </div>
+        <div class="form-group">
+            First Name: 
+            <InputText @bind-Value="OldAdult.FirstName"/>
+        </div>
+        <div class="form-group">
+            Last Name: 
+            <InputText @bind-Value="OldAdult.LastName"/>
+        </div>
+        <div class="form-group">
+            Age: 
+            <input type="number" @bind="OldAdult.Age"/>
+        </div>
+        <div class="form-group">
+            Sex:
+            <select class="form-control selectpicker" style="width: 100px" @bind="OldAdult.Sex">
+                <option>Male</option>
+                <option>Female</option>
+            </select>
+        </div>
+        <div class="form-group">
+            Hair color:
+            <select class="form-control selectpicker" style="width: 150px" @bind="OldAdult.HairColor">
+                <option>Blond</option>
+                <option>Red</option>
+                <option>Brown</option>
+                <option>Black</option>
+                <option>White</option>
+                <option>Grey</option>
+                <option>Blue</option>
+                <option>Green</option>
+                <option>Leverpostej</option>
+            </select>
+        </div>
+        <div class="form-group">
+            Eye color:
+            <select class="form-control selectpicker" style="width: 150px" @bind="OldAdult.EyeColor">
+                <option>Black</option>
+                <option>Brown</option>
+                <option>Grey</option>
+                <option>Green</option>
+                <option>Blue</option>
+                <option>Amber</option>
+                <option>Hazel</option>
+            </select>
+        </div>
+        <div class="form-group">
+            Weight: 
+            <input type="number" step="0.1" class="form-control" @bind="OldAdult.Weight"/>
+        </div>
+        <div class="form-group">
+            Height:
+            <input type="number" @bind="OldAdult.Height"/>
+        </div>
+        <div class="form-group">
+            Job:
+            <select class="form-control selectpicker" style="width: 250px" @bind="OldAdult.JobTitle">
+                <option>Teacher</option>
+                <option>Engineer</option>
+                <option>Garbage Collector</option>
+                <option>Shepherd</option>
+                <option>Pilot</option>
+                <option>Police Officer</option>
+                <option>Pirate</option>
+                <option>Fireman</option>
+                <option>Astronaut</option>
+                <option>Captain</option>
+                <option>Soldier</option>
+                <option>Pizza Chef</option>
+                <option>Chef</option>
+                <option>Janitor</option>
+                <option>Factory Worker</option>
+                <option>Chauffeur</option>
+                <option>Waitress</option>
+                <option>Ninja</option>
+                <option>Doctor</option>
+                <option>Nurse</option>
+                <option>Chemist</option>
+                <option>Caretaker</option>
+                <option>Gardener</option>
+                <option>Mascot</option>
+                <option>Athlete</option>
+            </select>
+        </div>
+    </EditForm>
+}
+
+@code {
+    public static Adult OldAdult;
+    private string role;
+
+    protected override async Task OnInitializedAsync()
+        {
+        role = "Adult";
+        }
+
+    private async Task updateAdult()
+        {
+            await FamilyService.UpdateAdult(OldAdult);
+            NavigationManager.NavigateTo("/PeopleList");
+        }
+
+}
